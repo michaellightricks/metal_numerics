@@ -9,6 +9,9 @@
 #import "GameViewController.h"
 #import "SharedStructures.h"
 
+#import "MNContext.h"
+#import "MNTest.h"
+
 @import simd;
 @import ModelIO;
 
@@ -30,11 +33,11 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
     
     // renderer
     id <MTLDevice> _device;
-    id <MTLCommandQueue> _commandQueue;
-    id <MTLLibrary> _defaultLibrary;
     id <MTLRenderPipelineState> _pipelineState;
     id <MTLDepthStencilState> _depthState;
-    
+    MNContext *_context;
+
+
     // uniforms
     matrix_float4x4 _projectionMatrix;
     matrix_float4x4 _viewMatrix;
@@ -80,12 +83,8 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
 {
     // Set the view to use the default device
     _device = MTLCreateSystemDefaultDevice();
-    
-    // Create a new command queue
-    _commandQueue = [_device newCommandQueue];
-    
-    // Load all the shader files with a metal file extension in the project
-    _defaultLibrary = [_device newDefaultLibrary];
+
+    _context = [[MNContext alloc] initWithDevice:_device];
 }
 
 - (void)_loadAssets
@@ -102,10 +101,10 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
     _dynamicConstantBuffer.label = @"UniformBuffer";
     
     // Load the fragment program into the library
-    id <MTLFunction> fragmentProgram = [_defaultLibrary newFunctionWithName:@"lighting_fragment"];
+    id <MTLFunction> fragmentProgram = [_context.library newFunctionWithName:@"lighting_fragment"];
     
     // Load the vertex program into the library
-    id <MTLFunction> vertexProgram = [_defaultLibrary newFunctionWithName:@"lighting_vertex"];
+    id <MTLFunction> vertexProgram = [_context.library newFunctionWithName:@"lighting_vertex"];
     
     // Create a vertex descriptor from the MTKMesh
     MTLVertexDescriptor *vertexDescriptor = MTKMetalVertexDescriptorFromModelIO(_boxMesh.vertexDescriptor);
@@ -138,11 +137,12 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
 - (void)_render
 {
     dispatch_semaphore_wait(_inflight_semaphore, DISPATCH_TIME_FOREVER);
-    
+
+  [self compute];
     [self _update];
 
     // Create a new command buffer for each renderpass to the current drawable
-    id <MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
+    id <MTLCommandBuffer> commandBuffer = [_context.queue commandBuffer];
     commandBuffer.label = @"MyCommand";
 
     // Call the view's completion handler which is required by the view since it will signal its semaphore and set up the next buffer
@@ -208,6 +208,11 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
     uniforms->normal_matrix = matrix_invert(matrix_transpose(modelViewMatrix));
     uniforms->modelview_projection_matrix = matrix_multiply(_projectionMatrix, modelViewMatrix);    
     _rotation += 0.01f;
+}
+
+- (void)compute {
+  MNTest *test = [[MNTest alloc] initWithContext:_context];
+  [test run];
 }
 
 // Called whenever view changes orientation or layout is changed
