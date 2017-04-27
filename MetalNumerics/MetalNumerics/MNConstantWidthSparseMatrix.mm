@@ -9,7 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MNConstantWidthSparseMatrix ()
 
-@property (readonly, nonatomic) ushort groupsNumber;
+@property (readonly, nonatomic) ushort width;
 
 @end
 
@@ -20,12 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
   if (self = [super init]) {
     ushort reminder = width % 4;
     _rowsNumber = rowsNumber;
-    _groupsNumber = width / 4 + (reminder ? 1 : 0);
+    _width = width;
     _buffer = [context.device
-               newBufferWithLength:rowsNumber * self.groupsNumber * sizeof(simd::float4)
+               newBufferWithLength:rowsNumber * width * sizeof(float16_t)
                options:MTLResourceStorageModeShared];
     _columnIndices = [context.device
-                      newBufferWithLength:rowsNumber * self.groupsNumber * sizeof(simd::ushort4)
+                      newBufferWithLength:rowsNumber * width * sizeof(ushort)
                       options:MTLResourceStorageModeShared];
   }
 
@@ -38,15 +38,15 @@ NS_ASSUME_NONNULL_BEGIN
     float4num += 1;
   }
 
-  return float4num * sizeof(simd::float4);
+  return float4num * sizeof(float16_t) * 4;
 }
 
-- (void)insertElement:(float)element row:(ushort)row index:(ushort)index column:(ushort)column {
-  float *bufferPtr = (float *)self.buffer.contents;
-  float *elementPtr = bufferPtr + row * self.groupsNumber * 4 + index;
+- (void)insertElement:(float16_t)element row:(ushort)row index:(ushort)index column:(ushort)column {
+  float16_t *bufferPtr = (float16_t *)self.buffer.contents;
+  float16_t *elementPtr = bufferPtr + row * self.width + index;
   *elementPtr = element;
   ushort *indeciesPtr = (ushort *)self.columnIndices.contents;
-  ushort *indexPtr = indeciesPtr + row * self.groupsNumber * 4 + index;
+  ushort *indexPtr = indeciesPtr + row * self.width + index;
   *indexPtr = column;
 }
 

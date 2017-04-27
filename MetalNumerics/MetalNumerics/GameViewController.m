@@ -46,6 +46,8 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
     
     // meshes
     MTKMesh *_boxMesh;
+    MNTest *_test;
+
 }
 
 - (void)viewDidLoad
@@ -132,6 +134,8 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
     depthStateDesc.depthCompareFunction = MTLCompareFunctionLess;
     depthStateDesc.depthWriteEnabled = YES;
     _depthState = [_device newDepthStencilStateWithDescriptor:depthStateDesc];
+
+    _test = [[MNTest alloc] initWithContext:_context];
 }
 
 - (void)_render
@@ -211,8 +215,7 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
 }
 
 - (void)compute {
-  MNTest *test = [[MNTest alloc] initWithContext:_context];
-  [test run];
+  [_test run];
 }
 
 // Called whenever view changes orientation or layout is changed
@@ -226,7 +229,8 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
     @autoreleasepool {
-        [self _render];
+        //[self _render];
+      [self compute];
     }
 }
 

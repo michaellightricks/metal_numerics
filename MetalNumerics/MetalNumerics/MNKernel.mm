@@ -40,8 +40,18 @@
 }
 
 - (void)run {
-  id<MTLCommandBuffer> commandBuffer = [self.context.queue commandBuffer];
+  id<MTLCommandBuffer> commandBuffer = [self enque];
+  [commandBuffer waitUntilCompleted];
+}
 
+- (id<MTLCommandBuffer>)enque {
+  id<MTLCommandBuffer> commandBuffer = [self.context.queue commandBuffer];
+  [self enqueTo:commandBuffer];
+  [commandBuffer commit];
+  return commandBuffer;
+}
+
+- (void)enqueTo:(id<MTLCommandBuffer>)commandBuffer {
   id<MTLComputeCommandEncoder> commandEncoder = [commandBuffer computeCommandEncoder];
 
   [commandEncoder setComputePipelineState:self.pipeline];
@@ -53,9 +63,6 @@
 
   [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadgroupSize];
   [commandEncoder endEncoding];
-
-  [commandBuffer commit];
-  [commandBuffer waitUntilCompleted];
 }
 
 - (void)configureCommandEncoder:(id<MTLComputeCommandEncoder>)encoder {

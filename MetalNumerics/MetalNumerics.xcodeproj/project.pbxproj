@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		64AA0ECB1EAF87B2003BFBCD /* SMVMConstWidthKernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 64AA0ECA1EAF87B2003BFBCD /* SMVMConstWidthKernel.m */; };
+		64AA0ECB1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64AA0ECA1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm */; };
 		64AA0ECE1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64AA0ECD1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.mm */; };
 		64AA0ED11EAF9153003BFBCD /* MNTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64AA0ED01EAF9153003BFBCD /* MNTest.mm */; };
 		64B8909C1D1B1A5900AD6248 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 64B8909B1D1B1A5900AD6248 /* main.m */; };
@@ -45,7 +45,7 @@
 
 /* Begin PBXFileReference section */
 		64AA0EC91EAF87B2003BFBCD /* SMVMConstWidthKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMVMConstWidthKernel.h; sourceTree = "<group>"; };
-		64AA0ECA1EAF87B2003BFBCD /* SMVMConstWidthKernel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMVMConstWidthKernel.m; sourceTree = "<group>"; };
+		64AA0ECA1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SMVMConstWidthKernel.mm; sourceTree = "<group>"; };
 		64AA0ECC1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNConstantWidthSparseMatrix.h; sourceTree = "<group>"; };
 		64AA0ECD1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MNConstantWidthSparseMatrix.mm; sourceTree = "<group>"; };
 		64AA0ECF1EAF9153003BFBCD /* MNTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNTest.h; sourceTree = "<group>"; };
@@ -156,7 +156,7 @@
 				64B890DA1D1B26E400AD6248 /* MNCRSSparseMatrix.m */,
 				64B890DC1D1B297000AD6248 /* SMVM.metal */,
 				64AA0EC91EAF87B2003BFBCD /* SMVMConstWidthKernel.h */,
-				64AA0ECA1EAF87B2003BFBCD /* SMVMConstWidthKernel.m */,
+				64AA0ECA1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm */,
 				64AA0ECC1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.h */,
 				64AA0ECD1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.mm */,
 				64AA0ECF1EAF9153003BFBCD /* MNTest.h */,
@@ -323,7 +323,7 @@
 				64B890D81D1B22A100AD6248 /* MNKernel.mm in Sources */,
 				64B890D21D1B214300AD6248 /* MNContext.mm in Sources */,
 				64B890DD1D1B297000AD6248 /* SMVM.metal in Sources */,
-				64AA0ECB1EAF87B2003BFBCD /* SMVMConstWidthKernel.m in Sources */,
+				64AA0ECB1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm in Sources */,
 				64AA0ED11EAF9153003BFBCD /* MNTest.mm in Sources */,
 				64B890D51D1B227C00AD6248 /* SMVMKernel.mm in Sources */,
 			);

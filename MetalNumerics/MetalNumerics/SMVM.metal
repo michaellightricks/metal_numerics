@@ -48,20 +48,19 @@ kernel void SMVM_CSR(device float *csrBuffer [[buffer(0)]], device int *nzRow [[
   outVector[tid] = accumulator;
 }
 
-constant ushort kWidth = 25;
 constant ushort k4Stride = 7;
 
-kernel void SMVM_CONST_WIDTH(device float4 *matrixByRow [[buffer(0)]],
+kernel void SMVM_CONST_WIDTH(device half4 *matrixByRow [[buffer(0)]],
                              device ushort4 * columnIdxs [[buffer(1)]],
-                             constant float *vector [[buffer(2)]],
-                             device float *outVector [[buffer(3)]],
+                             device half *vector [[buffer(2)]],
+                             device half *outVector [[buffer(3)]],
                              ushort tid [[ thread_position_in_grid]]) {
   ushort row = tid;
-  float result = 0;
+  half result = 0;
   for (int i = 0; i < k4Stride; ++i) {
-    float4 elements = matrixByRow[row * k4Stride + i];
+    half4 elements = matrixByRow[row * k4Stride + i];
     ushort4 columns = columnIdxs[row * k4Stride + i];
-    float4 vectorElements;
+    half4 vectorElements;
     vectorElements.x = vector[columns.x];
     vectorElements.y = vector[columns.y];
     vectorElements.z = vector[columns.z];
@@ -71,6 +70,54 @@ kernel void SMVM_CONST_WIDTH(device float4 *matrixByRow [[buffer(0)]],
   }
 
   outVector[row] = result;
+}
+
+kernel void SMVM_CONST_WIDTH_WARP(device half *matrixByRow [[buffer(0)]],
+                                  device ushort * columnIdxs [[buffer(1)]],
+                                  device half *vector [[buffer(2)]],
+                                  device half *outVector [[buffer(3)]],
+                                  uint tid [[ thread_position_in_grid]],
+                                  uint threadInGroupIdx [[ thread_index_in_threadgroup ]]) {
+  uint warpIdx = tid / 32;
+  uint indexInWarp = tid - warpIdx * 32;
+
+  threadgroup half sharedMemory[32];
+
+  uint row = warpIdx;
+  half coeff = matrixByRow[32 * row + indexInWarp];
+  half rhs = vector[columnIdxs[32 * row + indexInWarp]];
+
+  half product = coeff * rhs;
+  sharedMemory[threadInGroupIdx] = product;
+  threadgroup_barrier(mem_flags::mem_none);
+
+  if (indexInWarp < 16) {
+    sharedMemory[threadInGroupIdx] =
+        sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 16];
+  }
+  threadgroup_barrier(mem_flags::mem_none);
+
+  if (indexInWarp < 8) {
+    sharedMemory[threadInGroupIdx] =
+        sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 8];
+  }
+  threadgroup_barrier(mem_flags::mem_none);
+
+  if (indexInWarp < 4) {
+    sharedMemory[threadInGroupIdx] =
+        sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 4];
+  }
+  threadgroup_barrier(mem_flags::mem_none);
+
+  if (indexInWarp < 2) {
+    sharedMemory[threadInGroupIdx] =
+        sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 2];
+  }
+  threadgroup_barrier(mem_flags::mem_none);
+
+  if (indexInWarp == 0) {
+    outVector[row] = sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 1];
+  }
 }
 
 

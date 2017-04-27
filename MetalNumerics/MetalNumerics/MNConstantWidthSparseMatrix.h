@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly, nonatomic) id<MTLBuffer> columnIndices;
 @property (readonly, nonatomic) ushort rowsNumber;
 
-- (void)insertElement:(float)element row:(ushort)row index:(ushort)index column:(ushort)column;
+- (void)insertElement:(float16_t)element row:(ushort)row index:(ushort)index column:(ushort)column;
 
 @end
 

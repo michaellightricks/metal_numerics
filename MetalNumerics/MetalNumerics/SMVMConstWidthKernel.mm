@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 @implementation SMVMConstWidthKernel
 
 - (instancetype)initWithContext:(MNContext *)context {
-  if (self = [super initWithContext:context functionName:@"SMVM_CONST_WIDTH"]) {
+  if (self = [super initWithContext:context functionName:@"SMVM_CONST_WIDTH_WARP"]) {
 
   }
 
@@ -25,11 +25,11 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (MTLSize)threadGroupSize {
-  return MTLSizeMake(64, 1, 1);
+  return MTLSizeMake(32, 1, 1);
 }
 
 - (MTLSize)threadGroupsCount:(MTLSize)threadGroupSize {
-  return MTLSizeMake(self.matrix.rowsNumber / 64, 1, 1);
+  return MTLSizeMake(self.matrix.rowsNumber, 1, 1);
 }
 
 @end

@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-
 @class MNContext;
 
 @interface MNKernel : NSObject
@@ -20,6 +19,10 @@
     NS_DESIGNATED_INITIALIZER;
 
 - (void)run;
+
+- (id<MTLCommandBuffer>)enque;
+
+- (void)enqueTo:(id<MTLCommandBuffer>)commandBuffer;
 
 /// protected abstract
 - (void)configureCommandEncoder:(id<MTLComputeCommandEncoder>)encoder;
