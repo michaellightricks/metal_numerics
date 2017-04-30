@@ -87,6 +87,8 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
     _device = MTLCreateSystemDefaultDevice();
 
     _context = [[MNContext alloc] initWithDevice:_device];
+
+    _test = [[MNTest alloc] initWithContext:_context];
 }
 
 - (void)_loadAssets
@@ -134,8 +136,6 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
     depthStateDesc.depthCompareFunction = MTLCompareFunctionLess;
     depthStateDesc.depthWriteEnabled = YES;
     _depthState = [_device newDepthStencilStateWithDescriptor:depthStateDesc];
-
-    _test = [[MNTest alloc] initWithContext:_context];
 }
 
 - (void)_render
@@ -229,7 +229,7 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
     @autoreleasepool {
-        //[self _render];
+      [self _render];
       [self compute];
     }
 }

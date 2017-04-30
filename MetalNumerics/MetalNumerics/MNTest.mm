@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 static const ushort kWidth = 32;
 
-const ushort kRowsNumber = 64 * 10;
+const ushort kRowsNumber = 64 * 500;
 
 @interface MNTest ()
 
@@ -24,6 +24,8 @@ const ushort kRowsNumber = 64 * 10;
 @property (readonly, nonatomic) id<MTLBuffer> vectorBuffer;
 
 @property (readonly, nonatomic) id<MTLBuffer> resultBuffer;
+
+@property (readonly, nonatomic) SMVMConstWidthKernel *kernel;
 
 @end
 
@@ -52,23 +54,27 @@ const ushort kRowsNumber = 64 * 10;
 
     _resultBuffer = [self.context.device newBufferWithLength:sizeof(float16_t) * kRowsNumber
                                                      options:MTLResourceStorageModeShared];
+    float16_t *resultPtr = (float16_t *)self.resultBuffer.contents;
+    for (int i = 0; i < kRowsNumber; ++i) {
+      resultPtr[i] = 0;
+    }
+
+    _kernel = [[SMVMConstWidthKernel alloc] initWithContext:self.context];
+    self.kernel.matrix = self.matrix;
+    self.kernel.vector = self.vectorBuffer;
+    self.kernel.result = self.resultBuffer;
   }
 
   return self;
 }
 
-
 - (void)run {
   id<MTLCommandBuffer> commandBuffer = [self.context.queue commandBuffer];
-  SMVMConstWidthKernel *kernel = [[SMVMConstWidthKernel alloc] initWithContext:self.context];
-  kernel.matrix = self.matrix;
-  kernel.vector = self.vectorBuffer;
-  kernel.result = self.resultBuffer;
 
   NSTimeInterval time = 0;
   NSDate *methodStart = [NSDate date];
-  for (int i = 0; i < 1; ++i) {
-    [kernel enqueTo:commandBuffer];
+  for (int i = 0; i < 10; ++i) {
+    [self.kernel enqueTo:commandBuffer];
   }
 
   [commandBuffer commit];
@@ -76,16 +82,17 @@ const ushort kRowsNumber = 64 * 10;
   if ([commandBuffer error]) {
     NSLog(@"error");
   }
+  
   NSDate *methodFinish = [NSDate date];
   NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
   time += executionTime;
 
   NSLog(@"Took %g", time / 10);
 
-  float *resultPtr = (float *)kernel.result.contents;
-  for (int i = 0; i < kRowsNumber; i += 10) {
-    NSLog(@"%g", resultPtr[i]);
-  }
+//  float16_t *resultPtr = (float16_t *)self.kernel.result.contents;
+//  for (int i = 0; i < kRowsNumber; i += 10) {
+//    NSLog(@"%g", (double)resultPtr[i]);
+//  }
 }
 
 @end

@@ -18,7 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithContext:(MNContext *)context numberOfRows:(ushort)rowsNumber
                           width:(ushort)width {
   if (self = [super init]) {
-    ushort reminder = width % 4;
     _rowsNumber = rowsNumber;
     _width = width;
     _buffer = [context.device
@@ -30,15 +29,6 @@ NS_ASSUME_NONNULL_BEGIN
   }
 
   return self;
-}
-
-- (int)widthInBytes:(ushort)width {
-  ushort float4num = width / 4;
-  if (width % 4 != 0) {
-    float4num += 1;
-  }
-
-  return float4num * sizeof(float16_t) * 4;
 }
 
 - (void)insertElement:(float16_t)element row:(ushort)row index:(ushort)index column:(ushort)column {

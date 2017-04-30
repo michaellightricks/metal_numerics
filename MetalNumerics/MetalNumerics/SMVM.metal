@@ -83,40 +83,37 @@ kernel void SMVM_CONST_WIDTH_WARP(device half *matrixByRow [[buffer(0)]],
 
   threadgroup half sharedMemory[32];
 
-  uint row = warpIdx;
-  half coeff = matrixByRow[32 * row + indexInWarp];
-  half rhs = vector[columnIdxs[32 * row + indexInWarp]];
+  for (int i = 0; i < 32; ++i) {
+    uint row = warpIdx * 32 + i;
+    half coeff = matrixByRow[32 * row + indexInWarp];
+    half rhs = vector[columnIdxs[32 * row + indexInWarp]];
 
-  half product = coeff * rhs;
-  sharedMemory[threadInGroupIdx] = product;
-  threadgroup_barrier(mem_flags::mem_none);
+    half product = coeff * rhs;
+    sharedMemory[threadInGroupIdx] = product;
 
-  if (indexInWarp < 16) {
-    sharedMemory[threadInGroupIdx] =
-        sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 16];
-  }
-  threadgroup_barrier(mem_flags::mem_none);
+    if (indexInWarp < 16) {
+      sharedMemory[threadInGroupIdx] =
+          sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 16];
+    }
 
-  if (indexInWarp < 8) {
-    sharedMemory[threadInGroupIdx] =
-        sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 8];
-  }
-  threadgroup_barrier(mem_flags::mem_none);
+    if (indexInWarp < 8) {
+      sharedMemory[threadInGroupIdx] =
+          sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 8];
+    }
 
-  if (indexInWarp < 4) {
-    sharedMemory[threadInGroupIdx] =
-        sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 4];
-  }
-  threadgroup_barrier(mem_flags::mem_none);
+    if (indexInWarp < 4) {
+      sharedMemory[threadInGroupIdx] =
+          sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 4];
+    }
 
-  if (indexInWarp < 2) {
-    sharedMemory[threadInGroupIdx] =
-        sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 2];
-  }
-  threadgroup_barrier(mem_flags::mem_none);
+    if (indexInWarp < 2) {
+      sharedMemory[threadInGroupIdx] =
+          sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 2];
+    }
 
-  if (indexInWarp == 0) {
-    outVector[row] = sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 1];
+    if (indexInWarp == 0) {
+      outVector[row] = sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 1];
+    }
   }
 }
 
