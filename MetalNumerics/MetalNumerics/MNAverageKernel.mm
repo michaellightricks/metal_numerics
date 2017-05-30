@@ -39,7 +39,8 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
-  return MTLSizeMake(std::max((NSUInteger)1, self.elementsNumber / threadGroupSize.width), 1, 1);
+  /// Dividing by 32 is the most important optimization.
+  return MTLSizeMake(std::max((NSUInteger)1, self.elementsNumber / threadGroupSize.width / 32), 1, 1);
 }
 
 + (void)testWithContext:(MNContext *)context {
@@ -58,9 +59,10 @@ NS_ASSUME_NONNULL_BEGIN
 
   NSTimeInterval time = 0;
   NSDate *methodStart = [NSDate date];
-  int iterationsNumber = 1;
-  uint count = bufferElements;
+  int iterationsNumber = 10;
+  uint count;
   for (int i = 0; i < iterationsNumber; ++i) {
+    count = bufferElements;
     while (count > 1) {
       [kernel setInputBuffer:buffer1 withElementsCount:count];
       kernel.result = buffer2;
@@ -82,8 +84,8 @@ NS_ASSUME_NONNULL_BEGIN
   if ([commandBuffer error]) {
     NSLog(@"error");
   } else {
-    float *inputPtr = (float *)((uint *)kernel.inputBuffer.contents + 1);
-    float *resultPtr = (float *)((uint *)kernel.result.contents + 1);
+    float *inputPtr = (float *)((uint *)kernel.inputBuffer.contents);
+    float *resultPtr = (float *)((uint *)kernel.result.contents);
     for (size_t i = 0; i < count; ++i) {
 //      if (resultPtr[i] != 512) {
         NSLog(@"aaa %f", resultPtr[i]);
