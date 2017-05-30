@@ -130,18 +130,18 @@ void warpReduce(threadgroup float *sharedMemory, uint threadInWarp) {
 }
 
 void groupReduce(threadgroup float *sharedMemory, uint threadInGroupIdx, uint groupDim) {
-  for (uint s = groupDim; s > 0; s = s >> 1) {
+  for (uint s = groupDim; s > 0; s = s / 2) {
     if  (threadInGroupIdx < s) {
       sharedMemory[threadInGroupIdx] = sharedMemory[threadInGroupIdx] +
           sharedMemory[threadInGroupIdx + s];
-      threadgroup_barrier(mem_flags::mem_threadgroup);
     }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
   }
 }
 
 kernel void averageGroupReduce(device float *buffer [[buffer(0)]],
                     device float *result [[buffer(1)]],
-                    constant uint *bufferSize,
+                    device uint *bufferSize [[buffer(2)]],
                     threadgroup float *sharedMemory [[ threadgroup(0) ]],
                     uint tid [[ thread_position_in_grid]],
                     uint threadInGroupIdx [[ thread_index_in_threadgroup ]],
@@ -149,14 +149,19 @@ kernel void averageGroupReduce(device float *buffer [[buffer(0)]],
                     uint gridDim [[threadgroups_per_grid]],
                     uint groupDim [[threads_per_threadgroup]]) {
   float sum = 0;
-  //reduce multiple elements per thread
-  for (uint i = groupIdx * gridDim + threadInGroupIdx; i < bufferSize[0]; i += gridDim * groupDim) {
+  uint N = bufferSize[0];
+  for (uint i = groupIdx * groupDim + threadInGroupIdx; i < N;
+          i += gridDim * groupDim) {
     sum += buffer[i];
   }
+  //sum = buffer[groupIdx * groupDim + threadInGroupIdx];
+
 
   sharedMemory[threadInGroupIdx] = sum;
   threadgroup_barrier(mem_flags::mem_threadgroup);
   groupReduce(sharedMemory, threadInGroupIdx, groupDim / 2);
-  if (tid == 0) result[groupIdx] = sharedMemory[0];
+  if (threadInGroupIdx == 0) {
+    result[groupIdx] = N;//sharedMemory[0];
+  }
 }
 

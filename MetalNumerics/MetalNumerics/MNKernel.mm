@@ -59,7 +59,7 @@
   [self configureCommandEncoder:commandEncoder];
 
   MTLSize threadgroupSize = [self threadGroupSize];
-  MTLSize threadgroups = [self threadGroupsCount:threadgroupSize];
+  MTLSize threadgroups = [self threadGroupsCountWithGroupSize:threadgroupSize];
 
   [commandEncoder dispatchThreadgroups:threadgroups threadsPerThreadgroup:threadgroupSize];
   [commandEncoder endEncoding];
@@ -73,7 +73,7 @@
   return MTLSizeMake(0, 0, 0);
 }
 
-- (MTLSize)threadGroupsCount:(MTLSize)threadGroupSize {
+- (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
   return MTLSizeMake(0, 0, 0);
 }
 

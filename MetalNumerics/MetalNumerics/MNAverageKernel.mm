@@ -3,25 +3,105 @@
 
 #import "MNAverageKernel.h"
 
+#import "MNContext.h"
+
 NS_ASSUME_NONNULL_BEGIN
+
+@interface MNAverageKernel ()
+
+@property (readonly, nonatomic) id<MTLBuffer> elementsNumberBuffer;
+
+@property (strong, nonatomic) id<MTLBuffer> inputBuffer;
+
+@property (nonatomic) uint elementsNumber;
+
+@end
 
 @implementation MNAverageKernel
 
 - (instancetype)initWithContext:(MNContext *)context {
-  return [super initWithContext:context functionName:@"SMVM_CONST_WIDTH_WARP"];
+  if (self = [super initWithContext:context functionName:@"averageGroupReduce"]) {
+    _elementsNumberBuffer = [context.device newBufferWithLength:sizeof(uint)
+                                                        options:MTLResourceStorageModeShared];
+  }
+
+  return self;
 }
 
 - (void)configureCommandEncoder:(id<MTLComputeCommandEncoder>)encoder {
-  [encoder setBuffer:self.buffer offset:0 atIndex:0];
+  [encoder setBuffer:self.inputBuffer offset:0 atIndex:0];
   [encoder setBuffer:self.result offset:0 atIndex:1];
+  [encoder setBuffer:self.elementsNumberBuffer offset:0 atIndex:2];
+  [encoder setThreadgroupMemoryLength:self.threadGroupSize.width * sizeof(float) atIndex:0];
+}
+
+- (void)setInputBuffer:(id<MTLBuffer>)inputBuffer withElementsCount:(uint)count {
+  self.elementsNumber = (uint)count;
+  uint *elementsNumberPtr = (uint *)[self.elementsNumberBuffer contents];
+  *elementsNumberPtr = self.elementsNumber;
+  _inputBuffer = inputBuffer;
 }
 
 - (MTLSize)threadGroupSize {
   return MTLSizeMake(512, 1, 1);
 }
 
-- (MTLSize)threadGroupsCount:(MTLSize)threadGroupSize {
-  return MTLSizeMake(self.buffer.length / sizeof(float) , 1, 1);
+- (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
+  return MTLSizeMake(self.elementsNumber / threadGroupSize.width , 1, 1);
+}
+
+
++ (void)testWithContext:(MNContext *)context {
+  uint bufferElements = 1024 * 1024;
+  MNAverageKernel *kernel = [[MNAverageKernel alloc] initWithContext:context];
+  id<MTLBuffer> buffer1 = [context.device newBufferWithLength:bufferElements * sizeof(float)
+                                                      options:MTLResourceStorageModeShared];
+  id<MTLBuffer> buffer2 = [context.device newBufferWithLength:bufferElements * sizeof(float)
+                                                      options:MTLResourceStorageModeShared];
+  float *bufferPtr = (float *)[buffer1 contents];
+  for (size_t i = 0; i < bufferElements; ++i) {
+    bufferPtr[i] = 1;
+  }
+
+  id<MTLCommandBuffer> commandBuffer = [context.queue commandBuffer];
+
+  NSTimeInterval time = 0;
+  NSDate *methodStart = [NSDate date];
+  int iterationsNumber = 1;
+  uint count = bufferElements;
+  for (int i = 0; i < iterationsNumber; ++i) {
+    while (count > 512) {
+      [kernel setInputBuffer:buffer1 withElementsCount:count];
+      kernel.result = buffer2;
+      buffer2 = buffer1;
+      buffer1 = kernel.result;
+
+      TODO size buffer should be double buffered too.
+      count = (uint)[kernel threadGroupsCountWithGroupSize:kernel.threadGroupSize].width;
+      [kernel enqueTo:commandBuffer];
+    }
+  }
+
+  [commandBuffer commit];
+  [commandBuffer waitUntilCompleted];
+
+  NSDate *methodFinish = [NSDate date];
+  NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+  time += executionTime;
+  NSLog(@"Took %g sec", time / iterationsNumber);
+  if ([commandBuffer error]) {
+    NSLog(@"error");
+  } else {
+    float *inputPtr = (float *)kernel.inputBuffer.contents;
+    float *resultPtr = (float *)kernel.result.contents;
+    for (size_t i = 0; i < count; ++i) {
+//      if (resultPtr[i] != 512) {
+        NSLog(@"aaa %f", resultPtr[i]);
+        NSLog(@"bbb %f", inputPtr[i]);
+//      }
+    }
+    NSLog(@"aaa %f", resultPtr[count]);
+  }
 }
 
 @end

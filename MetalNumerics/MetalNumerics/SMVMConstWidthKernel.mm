@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
   return MTLSizeMake(32, 1, 1);
 }
 
-- (MTLSize)threadGroupsCount:(MTLSize)threadGroupSize {
+- (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
   return MTLSizeMake(self.matrix.rowsNumber / 32, 1, 1);
 }
 

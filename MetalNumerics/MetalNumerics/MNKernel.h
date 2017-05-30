@@ -29,7 +29,7 @@
 
 - (MTLSize)threadGroupSize;
 
-- (MTLSize)threadGroupsCount:(MTLSize)threadGroupSize;
+- (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize;
 
 @property (readonly, nonatomic) MNContext *context;
 
