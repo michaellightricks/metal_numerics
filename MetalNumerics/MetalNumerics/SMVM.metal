@@ -165,3 +165,51 @@ kernel void averageGroupReduce(device float *buffer [[buffer(0)]],
   }
 }
 
+
+
+kernel void SMVM_CONST_WIDTH_WARP_TEX(texture1d<half, access::read> matrixByRow [[texture(0)]],///device half *matrixByRow [[buffer(0)]],
+                                      texture1d<ushort, access::read> columnIdxs [[texture(1)]],//device ushort * columnIdxs  [[buffer(1)]],
+                                      texture1d<half, access::read> vector [[texture(2)]], ///device half *vector [[texture(2)]],
+                                      texture1d<half, access::write> outVector [[texture(3)]],//device half *outVector [[buffer(3)]],
+                                  uint tid [[ thread_position_in_grid]],
+                                  uint threadInGroupIdx [[ thread_index_in_threadgroup ]]) {
+  uint warpIdx = tid / 32;
+  uint indexInWarp = tid - warpIdx * 32;
+
+  threadgroup half sharedMemory[32];
+
+  for (int i = 0; i < 32; ++i) {
+    uint row = warpIdx * 32 + i;
+    half coeff = matrixByRow.read(32 * row + indexInWarp);//matrixByRow[32 * row + indexInWarp];
+    ushort idx = columnIdxs.read(32 * row + indexInWarp);
+    half rhs = vector.read(idx);//[columnIdxs[32 * row + indexInWarp]];
+
+    half product = coeff * rhs;
+    sharedMemory[threadInGroupIdx] = product;
+
+    if (indexInWarp < 16) {
+      sharedMemory[threadInGroupIdx] =
+      sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 16];
+    }
+
+    if (indexInWarp < 8) {
+      sharedMemory[threadInGroupIdx] =
+      sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 8];
+    }
+
+    if (indexInWarp < 4) {
+      sharedMemory[threadInGroupIdx] =
+      sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 4];
+    }
+
+    if (indexInWarp < 2) {
+      sharedMemory[threadInGroupIdx] =
+      sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 2];
+    }
+
+    if (indexInWarp == 0) {
+      outVector.write(row) = sharedMemory[threadInGroupIdx] + sharedMemory[threadInGroupIdx + 1];
+    }
+  }
+}
+
