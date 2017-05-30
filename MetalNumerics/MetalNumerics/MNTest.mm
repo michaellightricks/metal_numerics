@@ -73,21 +73,21 @@ const ushort kRowsNumber = 64 * 500;
 
   NSTimeInterval time = 0;
   NSDate *methodStart = [NSDate date];
-  for (int i = 0; i < 10; ++i) {
+  int count = 100;
+  for (int i = 0; i < count; ++i) {
     [self.kernel enqueTo:commandBuffer];
   }
 
   [commandBuffer commit];
   [commandBuffer waitUntilCompleted];
-  if ([commandBuffer error]) {
-    NSLog(@"error");
-  }
-  
+
   NSDate *methodFinish = [NSDate date];
   NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
   time += executionTime;
-
-  NSLog(@"Took %g", time / 10);
+  NSLog(@"Took %g", time / count);
+  if ([commandBuffer error]) {
+    NSLog(@"error");
+  }
 
 //  float16_t *resultPtr = (float16_t *)self.kernel.result.contents;
 //  for (int i = 0; i < kRowsNumber; i += 10) {

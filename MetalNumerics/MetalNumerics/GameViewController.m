@@ -229,7 +229,7 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
     @autoreleasepool {
-      [self _render];
+      //[self _render];
       [self compute];
     }
 }

@@ -85,6 +85,7 @@ kernel void SMVM_CONST_WIDTH_WARP(device half *matrixByRow [[buffer(0)]],
 
   for (int i = 0; i < 32; ++i) {
     uint row = warpIdx * 32 + i;
+    //uint row = warpIdx;
     half coeff = matrixByRow[32 * row + indexInWarp];
     half rhs = vector[columnIdxs[32 * row + indexInWarp]];
 

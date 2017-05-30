@@ -21,11 +21,11 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (MTLSize)threadGroupSize {
-  return MTLSizeMake(128, 1, 1);
+  return MTLSizeMake(32, 1, 1);
 }
 
 - (MTLSize)threadGroupsCount:(MTLSize)threadGroupSize {
-  return MTLSizeMake(self.matrix.rowsNumber / 128, 1, 1);
+  return MTLSizeMake(self.matrix.rowsNumber / 32, 1, 1);
 }
 
 @end
