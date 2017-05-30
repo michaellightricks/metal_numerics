@@ -118,4 +118,45 @@ kernel void SMVM_CONST_WIDTH_WARP(device half *matrixByRow [[buffer(0)]],
   }
 }
 
+void warpReduce(threadgroup float *sharedMemory, uint threadInWarp);
+void groupReduce(threadgroup float *sharedMemory, uint threadInGroupIdx, uint groupDim);
+
+void warpReduce(threadgroup float *sharedMemory, uint threadInWarp) {
+  for (uint s = 32; s > 0; s = s >> 1) {
+    if  (threadInWarp < s) {
+      sharedMemory[threadInWarp] = sharedMemory[threadInWarp] + sharedMemory[threadInWarp + s];
+    }
+  }
+}
+
+void groupReduce(threadgroup float *sharedMemory, uint threadInGroupIdx, uint groupDim) {
+  for (uint s = groupDim; s > 0; s = s >> 1) {
+    if  (threadInGroupIdx < s) {
+      sharedMemory[threadInGroupIdx] = sharedMemory[threadInGroupIdx] +
+          sharedMemory[threadInGroupIdx + s];
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+    }
+  }
+}
+
+kernel void averageGroupReduce(device float *buffer [[buffer(0)]],
+                    device float *result [[buffer(1)]],
+                    constant uint *bufferSize,
+                    threadgroup float *sharedMemory [[ threadgroup(0) ]],
+                    uint tid [[ thread_position_in_grid]],
+                    uint threadInGroupIdx [[ thread_index_in_threadgroup ]],
+                    uint groupIdx [[threadgroup_position_in_grid]],
+                    uint gridDim [[threadgroups_per_grid]],
+                    uint groupDim [[threads_per_threadgroup]]) {
+  float sum = 0;
+  //reduce multiple elements per thread
+  for (uint i = groupIdx * gridDim + threadInGroupIdx; i < bufferSize[0]; i += gridDim * groupDim) {
+    sum += buffer[i];
+  }
+
+  sharedMemory[threadInGroupIdx] = sum;
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  groupReduce(sharedMemory, threadInGroupIdx, groupDim / 2);
+  if (tid == 0) result[groupIdx] = sharedMemory[0];
+}
 
