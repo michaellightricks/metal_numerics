@@ -24,6 +24,7 @@
 		64B890D81D1B22A100AD6248 /* MNKernel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64B890D71D1B22A100AD6248 /* MNKernel.mm */; };
 		64B890DB1D1B26E400AD6248 /* MNCRSSparseMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = 64B890DA1D1B26E400AD6248 /* MNCRSSparseMatrix.m */; };
 		64B890DD1D1B297000AD6248 /* SMVM.metal in Sources */ = {isa = PBXBuildFile; fileRef = 64B890DC1D1B297000AD6248 /* SMVM.metal */; };
+		64BA27D91EDF6E3D00765567 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64BA27D81EDF6E3D00765567 /* Accelerate.framework */; };
 		64D121AB1EDD4F1400E64E78 /* MNAverageKernel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */; };
 /* End PBXBuildFile section */
 
@@ -78,6 +79,7 @@
 		64B890D91D1B26E400AD6248 /* MNCRSSparseMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNCRSSparseMatrix.h; sourceTree = "<group>"; };
 		64B890DA1D1B26E400AD6248 /* MNCRSSparseMatrix.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MNCRSSparseMatrix.m; sourceTree = "<group>"; };
 		64B890DC1D1B297000AD6248 /* SMVM.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SMVM.metal; sourceTree = "<group>"; };
+		64BA27D81EDF6E3D00765567 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		64D121A91EDD4F1400E64E78 /* MNAverageKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNAverageKernel.h; sourceTree = "<group>"; };
 		64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MNAverageKernel.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -87,6 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64BA27D91EDF6E3D00765567 /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,6 +117,7 @@
 				64B890B61D1B1A5900AD6248 /* MetalNumericsTests */,
 				64B890C11D1B1A5900AD6248 /* MetalNumericsUITests */,
 				64B890981D1B1A5900AD6248 /* Products */,
+				64BA27D71EDF6E3C00765567 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -186,6 +190,14 @@
 				64B890C41D1B1A5900AD6248 /* Info.plist */,
 			);
 			path = MetalNumericsUITests;
+			sourceTree = "<group>";
+		};
+		64BA27D71EDF6E3C00765567 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				64BA27D81EDF6E3D00765567 /* Accelerate.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

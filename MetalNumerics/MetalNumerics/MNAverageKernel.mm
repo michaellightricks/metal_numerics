@@ -5,6 +5,7 @@
 
 #import "MNContext.h"
 #import <algorithm>
+#import <Accelerate/Accelerate.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -39,12 +40,13 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
-  /// Dividing by 32 is the most important optimization.
+  /// Dividing by 32 is the most important optimization. The devisor may be dependent on the input size
+  /// but from experimentation 64 gives good result on all the sizes.
   return MTLSizeMake(std::max((NSUInteger)1, self.elementsNumber / (threadGroupSize.width * 64)), 1, 1);
 }
 
 + (void)testWithContext:(MNContext *)context {
-  uint bufferElements = 4096 * 4096;
+  uint bufferElements = 8192 * 8192;
   MNAverageKernel *kernel = [[MNAverageKernel alloc] initWithContext:context];
   id<MTLBuffer> buffer1 = [context.device newBufferWithLength:bufferElements * sizeof(float)
                                                       options:MTLResourceStorageModeShared];
@@ -54,6 +56,8 @@ NS_ASSUME_NONNULL_BEGIN
   for (size_t i = 0; i < bufferElements; ++i) {
     bufferPtr[i] = 1;
   }
+
+  [self testVDSPWithBuffer:bufferPtr elementsNumber:bufferElements];
 
   id<MTLCommandBuffer> commandBuffer = [context.queue commandBuffer];
 
@@ -80,20 +84,34 @@ NS_ASSUME_NONNULL_BEGIN
   NSDate *methodFinish = [NSDate date];
   NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
   time += executionTime;
-  NSLog(@"Took %g sec", time / iterationsNumber);
+  NSLog(@"MNAverageKernel Took %g sec", time / iterationsNumber);
   if ([commandBuffer error]) {
     NSLog(@"error");
   } else {
     float *inputPtr = (float *)((uint *)kernel.inputBuffer.contents);
     float *resultPtr = (float *)((uint *)kernel.result.contents);
     for (size_t i = 0; i < count; ++i) {
-//      if (resultPtr[i] != 512) {
         NSLog(@"aaa %f", resultPtr[i]);
         NSLog(@"bbb %f", inputPtr[i]);
-//      }
     }
     NSLog(@"aaa %f", resultPtr[count]);
   }
+}
+
++ (void)testVDSPWithBuffer:(float *)bufferPtr elementsNumber:(uint)elementsNumber {
+  size_t iterationsNumber = 10;
+  float rrrr = 0.0;
+
+  NSTimeInterval time = 0;
+  NSDate *methodStart = [NSDate date];
+  for (size_t i = 0; i < iterationsNumber; ++i) {
+    vDSP_sve(bufferPtr, 1, &rrrr, elementsNumber);
+  }
+  NSDate *methodFinish = [NSDate date];
+  NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+  time += executionTime;
+  NSLog(@"vDSP_sve Took %g sec sum:%g", time / iterationsNumber, rrrr);
+
 }
 
 @end
