@@ -178,8 +178,8 @@ void groupReduceAfterWarpReduce(threadgroup float *sharedMemory, uint threadInGr
 }
 
 kernel void averageGroupReduce2(device float *buffer [[buffer(0)]],
-                               device float *result [[buffer(1)]],
-                               constant uint *bufferSize [[buffer(2)]],
+                                //device float *result [[buffer(1)]],
+                               constant uint *bufferSize [[buffer(1)]],
                                threadgroup float *sharedMemory [[ threadgroup(0) ]],
                                uint threadInGroupIdx [[ thread_index_in_threadgroup ]],
                                uint groupIdx [[threadgroup_position_in_grid]],
@@ -201,7 +201,7 @@ kernel void averageGroupReduce2(device float *buffer [[buffer(0)]],
   /// this is performed by one warp since max threadgroup size is 512.
   groupReduceAfterWarpReduce(sharedMemory, threadInGroupIdx, groupDim / (32 * 2));
   if (threadInGroupIdx == 0) {
-    result[groupIdx] = sharedMemory[0];
+    buffer[groupIdx] = sharedMemory[0];
   }
 }
 

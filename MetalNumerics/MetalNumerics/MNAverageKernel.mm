@@ -25,8 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)configureCommandEncoder:(id<MTLComputeCommandEncoder>)encoder {
   [encoder setBuffer:self.inputBuffer offset:0 atIndex:0];
-  [encoder setBuffer:self.result offset:0 atIndex:1];
-  [encoder setBytes:&_elementsNumber length:sizeof(uint) atIndex:2];
+  //[encoder setBuffer:self.result offset:0 atIndex:1];
+  [encoder setBytes:&_elementsNumber length:sizeof(uint) atIndex:1];
   [encoder setThreadgroupMemoryLength:self.threadGroupSize.width * sizeof(float) atIndex:0];
 }
 
@@ -50,8 +50,6 @@ NS_ASSUME_NONNULL_BEGIN
   MNAverageKernel *kernel = [[MNAverageKernel alloc] initWithContext:context];
   id<MTLBuffer> buffer1 = [context.device newBufferWithLength:bufferElements * sizeof(float)
                                                       options:MTLResourceStorageModeShared];
-  id<MTLBuffer> buffer2 = [context.device newBufferWithLength:bufferElements * sizeof(float)
-                                                      options:MTLResourceStorageModeShared];
   float *bufferPtr = (float *)[buffer1 contents];
   for (size_t i = 0; i < bufferElements; ++i) {
     bufferPtr[i] = 1;
@@ -69,10 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
     count = bufferElements;
     while (count > 1) {
       [kernel setInputBuffer:buffer1 withElementsCount:count];
-      kernel.result = buffer2;
-      buffer2 = buffer1;
-      buffer1 = kernel.result;
-
+      kernel.result = buffer1;
       count = (uint)[kernel threadGroupsCountWithGroupSize:kernel.threadGroupSize].width;
       [kernel enqueTo:commandBuffer];
     }
@@ -88,11 +83,9 @@ NS_ASSUME_NONNULL_BEGIN
   if ([commandBuffer error]) {
     NSLog(@"error");
   } else {
-    float *inputPtr = (float *)((uint *)kernel.inputBuffer.contents);
     float *resultPtr = (float *)((uint *)kernel.result.contents);
     for (size_t i = 0; i < count; ++i) {
         NSLog(@"aaa %f", resultPtr[i]);
-        NSLog(@"bbb %f", inputPtr[i]);
     }
     NSLog(@"aaa %f", resultPtr[count]);
   }
@@ -110,7 +103,8 @@ NS_ASSUME_NONNULL_BEGIN
   NSDate *methodFinish = [NSDate date];
   NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
   time += executionTime;
-  NSLog(@"vDSP_sve Took %g sec sum:%g", time / iterationsNumber, rrrr);
+  NSLog(@"vDSP_sve Took %g sec", time / iterationsNumber);
+  NSLog(@"vDSP sum %f", rrrr);
 
 }
 
