@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @implementation MNAverageKernel
 
 - (instancetype)initWithContext:(MNContext *)context {
-  return [super initWithContext:context functionName:@"averageGroupReduce"];
+  return [super initWithContext:context functionName:@"averageGroupReduce2"];
 }
 
 - (void)configureCommandEncoder:(id<MTLComputeCommandEncoder>)encoder {
@@ -35,16 +35,16 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (MTLSize)threadGroupSize {
-  return MTLSizeMake(512, 1, 1);
+  return MTLSizeMake(512, /*std::max((uint)32, std::min(self.elementsNumber, (uint)512)),*/ 1, 1);
 }
 
 - (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
   /// Dividing by 32 is the most important optimization.
-  return MTLSizeMake(std::max((NSUInteger)1, self.elementsNumber / threadGroupSize.width / 32), 1, 1);
+  return MTLSizeMake(std::max((NSUInteger)1, self.elementsNumber / (threadGroupSize.width * 64)), 1, 1);
 }
 
 + (void)testWithContext:(MNContext *)context {
-  uint bufferElements = 1024 * 1024;
+  uint bufferElements = 4096 * 4096;
   MNAverageKernel *kernel = [[MNAverageKernel alloc] initWithContext:context];
   id<MTLBuffer> buffer1 = [context.device newBufferWithLength:bufferElements * sizeof(float)
                                                       options:MTLResourceStorageModeShared];
@@ -59,8 +59,8 @@ NS_ASSUME_NONNULL_BEGIN
 
   NSTimeInterval time = 0;
   NSDate *methodStart = [NSDate date];
-  int iterationsNumber = 10;
-  uint count;
+  int iterationsNumber = 50;
+  uint count = 0;
   for (int i = 0; i < iterationsNumber; ++i) {
     count = bufferElements;
     while (count > 1) {

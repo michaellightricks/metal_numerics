@@ -118,16 +118,9 @@ kernel void SMVM_CONST_WIDTH_WARP(device half *matrixByRow [[buffer(0)]],
   }
 }
 
-void warpReduce(threadgroup float *sharedMemory, uint threadInWarp);
+void warpReduce(threadgroup float *sharedMemory, uint warpIdx, uint indexInWarp);
 void groupReduce(threadgroup float *sharedMemory, uint threadInGroupIdx, uint groupDim);
-
-void warpReduce(threadgroup float *sharedMemory, uint threadInWarp) {
-  for (uint s = 32; s > 0; s = s >> 1) {
-    if  (threadInWarp < s) {
-      sharedMemory[threadInWarp] = sharedMemory[threadInWarp] + sharedMemory[threadInWarp + s];
-    }
-  }
-}
+void groupReduceAfterWarpReduce(threadgroup float *sharedMemory, uint threadInGroupIdx, uint dims);
 
 void groupReduce(threadgroup float *sharedMemory, uint threadInGroupIdx, uint groupDim) {
   for (uint s = groupDim; s > 0; s = s / 2) {
@@ -147,6 +140,9 @@ kernel void averageGroupReduce(device float *buffer [[buffer(0)]],
                     uint groupIdx [[threadgroup_position_in_grid]],
                     uint gridDim [[threadgroups_per_grid]],
                     uint groupDim [[threads_per_threadgroup]]) {
+  //uint warpIdx = threadInGroupIdx / 32;
+  //uint indexInWarp = threadInGroupIdx - warpIdx * 32;
+
   float sum = 0;
   uint N = bufferSize[0];
   for (uint i = groupIdx * groupDim + threadInGroupIdx; i < N;
@@ -157,6 +153,53 @@ kernel void averageGroupReduce(device float *buffer [[buffer(0)]],
   sharedMemory[threadInGroupIdx] = sum;
   threadgroup_barrier(mem_flags::mem_threadgroup);
   groupReduce(sharedMemory, threadInGroupIdx, groupDim / 2);
+  if (threadInGroupIdx == 0) {
+    result[groupIdx] = sharedMemory[0];
+  }
+}
+
+void warpReduce(threadgroup float *sharedMemory,
+                uint warpIdx, uint indexInWarp) {
+  uint baseIndex = warpIdx * 32 + indexInWarp;
+  for (uint s = 16; s > 0; s = s >> 1) {
+    if  (indexInWarp < s) {
+      sharedMemory[baseIndex] = sharedMemory[baseIndex] + sharedMemory[baseIndex + s];
+    }
+  }
+}
+
+void groupReduceAfterWarpReduce(threadgroup float *sharedMemory, uint threadInGroupIdx, uint dims) {
+  for (uint s = dims; s > 0; s = s >> 1) {
+    if (threadInGroupIdx < s) {
+      sharedMemory[threadInGroupIdx * 32] = sharedMemory[threadInGroupIdx * 32] +
+          sharedMemory[(threadInGroupIdx + s) * 32];
+    }
+  }
+}
+
+kernel void averageGroupReduce2(device float *buffer [[buffer(0)]],
+                               device float *result [[buffer(1)]],
+                               constant uint *bufferSize [[buffer(2)]],
+                               threadgroup float *sharedMemory [[ threadgroup(0) ]],
+                               uint threadInGroupIdx [[ thread_index_in_threadgroup ]],
+                               uint groupIdx [[threadgroup_position_in_grid]],
+                               uint gridDim [[threadgroups_per_grid]],
+                               uint groupDim [[threads_per_threadgroup]]) {
+  uint warpIdx = threadInGroupIdx / 32;
+  uint indexInWarp = threadInGroupIdx - warpIdx * 32;
+
+  float sum = 0;
+  uint N = bufferSize[0];
+  for (uint i = groupIdx * groupDim + threadInGroupIdx; i < N;
+       i += gridDim * groupDim) {
+    sum += buffer[i];
+  }
+
+  sharedMemory[threadInGroupIdx] = sum;
+  warpReduce(sharedMemory, warpIdx, indexInWarp);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  /// this is performed by one warp since max threadgroup size is 512.
+  groupReduceAfterWarpReduce(sharedMemory, threadInGroupIdx, groupDim / (32 * 2));
   if (threadInGroupIdx == 0) {
     result[groupIdx] = sharedMemory[0];
   }
