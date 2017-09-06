@@ -25,6 +25,10 @@
 		64B890DB1D1B26E400AD6248 /* MNCRSSparseMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = 64B890DA1D1B26E400AD6248 /* MNCRSSparseMatrix.m */; };
 		64B890DD1D1B297000AD6248 /* SMVM.metal in Sources */ = {isa = PBXBuildFile; fileRef = 64B890DC1D1B297000AD6248 /* SMVM.metal */; };
 		64BA27D91EDF6E3D00765567 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64BA27D81EDF6E3D00765567 /* Accelerate.framework */; };
+		64BB5EB01F1210C4005D652E /* MNCovarianceKernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.m */; };
+		64BB5EB21F12151F005D652E /* CovarianceKernel.metal in Sources */ = {isa = PBXBuildFile; fileRef = 64BB5EB11F12151F005D652E /* CovarianceKernel.metal */; };
+		64BB5EB41F1274C4005D652E /* tttt.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 64BB5EB31F1274C4005D652E /* tttt.jpg */; };
+		64BB5EB61F137B57005D652E /* lena.png in Resources */ = {isa = PBXBuildFile; fileRef = 64BB5EB51F137B57005D652E /* lena.png */; };
 		64D121AB1EDD4F1400E64E78 /* MNAverageKernel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */; };
 /* End PBXBuildFile section */
 
@@ -80,6 +84,11 @@
 		64B890DA1D1B26E400AD6248 /* MNCRSSparseMatrix.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MNCRSSparseMatrix.m; sourceTree = "<group>"; };
 		64B890DC1D1B297000AD6248 /* SMVM.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SMVM.metal; sourceTree = "<group>"; };
 		64BA27D81EDF6E3D00765567 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		64BB5EAE1F1210C4005D652E /* MNCovarianceKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNCovarianceKernel.h; sourceTree = "<group>"; };
+		64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MNCovarianceKernel.m; sourceTree = "<group>"; };
+		64BB5EB11F12151F005D652E /* CovarianceKernel.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = CovarianceKernel.metal; sourceTree = "<group>"; };
+		64BB5EB31F1274C4005D652E /* tttt.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tttt.jpg; sourceTree = "<group>"; };
+		64BB5EB51F137B57005D652E /* lena.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lena.png; sourceTree = "<group>"; };
 		64D121A91EDD4F1400E64E78 /* MNAverageKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNAverageKernel.h; sourceTree = "<group>"; };
 		64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MNAverageKernel.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -170,6 +179,11 @@
 				64AA0ED01EAF9153003BFBCD /* MNTest.mm */,
 				64D121A91EDD4F1400E64E78 /* MNAverageKernel.h */,
 				64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */,
+				64BB5EB51F137B57005D652E /* lena.png */,
+				64BB5EAE1F1210C4005D652E /* MNCovarianceKernel.h */,
+				64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.m */,
+				64BB5EB11F12151F005D652E /* CovarianceKernel.metal */,
+				64BB5EB31F1274C4005D652E /* tttt.jpg */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -305,8 +319,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				64B890AD1D1B1A5900AD6248 /* LaunchScreen.storyboard in Resources */,
+				64BB5EB61F137B57005D652E /* lena.png in Resources */,
 				64B890AA1D1B1A5900AD6248 /* Assets.xcassets in Resources */,
 				64B890A81D1B1A5900AD6248 /* Main.storyboard in Resources */,
+				64BB5EB41F1274C4005D652E /* tttt.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +349,7 @@
 			files = (
 				64B890A41D1B1A5900AD6248 /* Shaders.metal in Sources */,
 				64AA0ECE1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.mm in Sources */,
+				64BB5EB01F1210C4005D652E /* MNCovarianceKernel.m in Sources */,
 				64B890DB1D1B26E400AD6248 /* MNCRSSparseMatrix.m in Sources */,
 				64B8909F1D1B1A5900AD6248 /* AppDelegate.m in Sources */,
 				64B890A21D1B1A5900AD6248 /* GameViewController.m in Sources */,
@@ -342,6 +359,7 @@
 				64B890D21D1B214300AD6248 /* MNContext.mm in Sources */,
 				64B890DD1D1B297000AD6248 /* SMVM.metal in Sources */,
 				64AA0ECB1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm in Sources */,
+				64BB5EB21F12151F005D652E /* CovarianceKernel.metal in Sources */,
 				64AA0ED11EAF9153003BFBCD /* MNTest.mm in Sources */,
 				64B890D51D1B227C00AD6248 /* SMVMKernel.mm in Sources */,
 			);

@@ -12,6 +12,7 @@
 #import "MNContext.h"
 #import "MNTest.h"
 #import "MNAverageKernel.h"
+#import "MNCovarianceKernel.h"
 
 @import simd;
 @import ModelIO;
@@ -218,6 +219,7 @@ static const size_t kMaxBytesPerFrame = 1024*1024;
 - (void)compute {
   //[_test run];
   [MNAverageKernel testWithContext:_context];
+  //[MNCovarianceKernel testWithContext:_context];
 }
 
 // Called whenever view changes orientation or layout is changed
