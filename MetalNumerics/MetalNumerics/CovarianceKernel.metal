@@ -117,19 +117,19 @@ float3x3 inverseCovariance(float3x3 covariance) {
 kernel void covarianceKernel(texture2d<float, access::sample> inputTexture [[texture(0)]],
                              device float *outputBuffer [[buffer(0)]],
                              uint2 tid [[ thread_position_in_grid]]) {
-  //float3x3 row1 = readRow(inputTexture, tid + uint2(0, -1));
-  //float3x3 row2 = readRow(inputTexture, tid);
-  //float3x3 row3 = readRow(inputTexture, tid + uint2(0, 1));
+  float3x3 row1 = readRow(inputTexture, tid + uint2(0, -1));
+  float3x3 row2 = readRow(inputTexture, tid);
+  float3x3 row3 = readRow(inputTexture, tid + uint2(0, 1));
 
-//  float3x3 inverse = covarianceAndMean(row1, row2, row3);
-  //float3x3 inverse = inverseCovariance(covariance);
-  if (tid.x == 0 && tid.y == 0) {
-    outputBuffer[0] = 1;
-  }
-  //outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6] = 1;//row2[1][0];
-//  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 1] = inverse[0][1];
-//  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 2] = inverse[0][2];
-//  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 3] = inverse[1][0];
-//  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 4] = inverse[1][1];
-//  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 5] = inverse[1][2];
+  float3x3 covariance = covarianceAndMean(row1, row2, row3);
+  float3x3 inverse = inverseCovariance(covariance);
+//  if (tid.x == 0 && tid.y == 0) {
+//    outputBuffer[0] = inverse[0][0];
+//  }
+  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6] = inverse[0][0];//row2[1][0];
+  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 1] = inverse[0][1];
+  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 2] = inverse[0][2];
+  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 3] = inverse[1][0];
+  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 4] = inverse[1][1];
+  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 5] = inverse[1][2];
 }

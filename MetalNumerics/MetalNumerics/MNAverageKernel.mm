@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
-  /// Dividing by 32 is the most important optimization. The devisor may be dependent on the input size
+  /// Dividing by 64 is the most important optimization. The devisor may be dependent on the input size
   /// but from experimentation 64 gives good result on all the sizes.
   return MTLSizeMake(std::max((NSUInteger)1, self.elementsNumber / (threadGroupSize.width * 64)), 1, 1);
 }
@@ -60,8 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
   id<MTLCommandBuffer> commandBuffer = [context.queue commandBuffer];
 
   NSTimeInterval time = 0;
-  NSDate *methodStart = [NSDate date];
-  int iterationsNumber = 50;
+  int iterationsNumber = 20;
   uint count = 0;
   for (int i = 0; i < iterationsNumber; ++i) {
     count = bufferElements;
@@ -72,6 +71,8 @@ NS_ASSUME_NONNULL_BEGIN
       [kernel enqueTo:commandBuffer];
     }
   }
+
+  NSDate *methodStart = [NSDate date];
 
   [commandBuffer commit];
   [commandBuffer waitUntilCompleted];
@@ -105,7 +106,6 @@ NS_ASSUME_NONNULL_BEGIN
   time += executionTime;
   NSLog(@"vDSP_sve Took %g sec", time / iterationsNumber);
   NSLog(@"vDSP sum %f", rrrr);
-
 }
 
 @end

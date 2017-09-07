@@ -161,7 +161,7 @@ kernel void averageGroupReduce(device float *buffer [[buffer(0)]],
 void warpReduce(threadgroup float *sharedMemory,
                 uint warpIdx, uint indexInWarp) {
   uint baseIndex = warpIdx * 32 + indexInWarp;
-  for (uint s = 16; s > 0; s = s >> 1) {
+  for (uint s = 16; s > 0; s = s / 2) {
     if  (indexInWarp < s) {
       sharedMemory[baseIndex] = sharedMemory[baseIndex] + sharedMemory[baseIndex + s];
     }
@@ -169,9 +169,9 @@ void warpReduce(threadgroup float *sharedMemory,
 }
 
 void groupReduceAfterWarpReduce(threadgroup float *sharedMemory, uint threadInGroupIdx, uint dims) {
-  for (uint s = dims; s > 0; s = s >> 1) {
+  for (uint s = dims; s > 0; s = s / 2) {
     if (threadInGroupIdx < s) {
-      sharedMemory[threadInGroupIdx * 32] = sharedMemory[threadInGroupIdx * 32] +
+      sharedMemory[threadInGroupIdx * 32] = sharedMemory[threadInGroupIdx * 32] + 
           sharedMemory[(threadInGroupIdx + s) * 32];
     }
   }

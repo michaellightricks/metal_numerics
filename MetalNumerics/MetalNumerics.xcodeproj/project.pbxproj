@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		649C080F1F613EEF002A2ABB /* MNSigmoidKernel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 649C080E1F613EEF002A2ABB /* MNSigmoidKernel.mm */; };
+		649C08111F614423002A2ABB /* MNSigmoid.metal in Sources */ = {isa = PBXBuildFile; fileRef = 649C08101F614423002A2ABB /* MNSigmoid.metal */; };
 		64AA0ECB1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64AA0ECA1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm */; };
 		64AA0ECE1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64AA0ECD1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.mm */; };
 		64AA0ED11EAF9153003BFBCD /* MNTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64AA0ED01EAF9153003BFBCD /* MNTest.mm */; };
@@ -25,7 +27,7 @@
 		64B890DB1D1B26E400AD6248 /* MNCRSSparseMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = 64B890DA1D1B26E400AD6248 /* MNCRSSparseMatrix.m */; };
 		64B890DD1D1B297000AD6248 /* SMVM.metal in Sources */ = {isa = PBXBuildFile; fileRef = 64B890DC1D1B297000AD6248 /* SMVM.metal */; };
 		64BA27D91EDF6E3D00765567 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64BA27D81EDF6E3D00765567 /* Accelerate.framework */; };
-		64BB5EB01F1210C4005D652E /* MNCovarianceKernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.m */; };
+		64BB5EB01F1210C4005D652E /* MNCovarianceKernel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.mm */; };
 		64BB5EB21F12151F005D652E /* CovarianceKernel.metal in Sources */ = {isa = PBXBuildFile; fileRef = 64BB5EB11F12151F005D652E /* CovarianceKernel.metal */; };
 		64BB5EB41F1274C4005D652E /* tttt.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 64BB5EB31F1274C4005D652E /* tttt.jpg */; };
 		64BB5EB61F137B57005D652E /* lena.png in Resources */ = {isa = PBXBuildFile; fileRef = 64BB5EB51F137B57005D652E /* lena.png */; };
@@ -50,6 +52,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		649C080D1F613EEF002A2ABB /* MNSigmoidKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNSigmoidKernel.h; sourceTree = "<group>"; };
+		649C080E1F613EEF002A2ABB /* MNSigmoidKernel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MNSigmoidKernel.mm; sourceTree = "<group>"; };
+		649C08101F614423002A2ABB /* MNSigmoid.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = MNSigmoid.metal; sourceTree = "<group>"; };
 		64AA0EC91EAF87B2003BFBCD /* SMVMConstWidthKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMVMConstWidthKernel.h; sourceTree = "<group>"; };
 		64AA0ECA1EAF87B2003BFBCD /* SMVMConstWidthKernel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SMVMConstWidthKernel.mm; sourceTree = "<group>"; };
 		64AA0ECC1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNConstantWidthSparseMatrix.h; sourceTree = "<group>"; };
@@ -85,7 +90,7 @@
 		64B890DC1D1B297000AD6248 /* SMVM.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = SMVM.metal; sourceTree = "<group>"; };
 		64BA27D81EDF6E3D00765567 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		64BB5EAE1F1210C4005D652E /* MNCovarianceKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNCovarianceKernel.h; sourceTree = "<group>"; };
-		64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MNCovarianceKernel.m; sourceTree = "<group>"; };
+		64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MNCovarianceKernel.mm; sourceTree = "<group>"; };
 		64BB5EB11F12151F005D652E /* CovarianceKernel.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = CovarianceKernel.metal; sourceTree = "<group>"; };
 		64BB5EB31F1274C4005D652E /* tttt.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tttt.jpg; sourceTree = "<group>"; };
 		64BB5EB51F137B57005D652E /* lena.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lena.png; sourceTree = "<group>"; };
@@ -181,9 +186,12 @@
 				64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */,
 				64BB5EB51F137B57005D652E /* lena.png */,
 				64BB5EAE1F1210C4005D652E /* MNCovarianceKernel.h */,
-				64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.m */,
+				64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.mm */,
 				64BB5EB11F12151F005D652E /* CovarianceKernel.metal */,
 				64BB5EB31F1274C4005D652E /* tttt.jpg */,
+				649C080D1F613EEF002A2ABB /* MNSigmoidKernel.h */,
+				649C080E1F613EEF002A2ABB /* MNSigmoidKernel.mm */,
+				649C08101F614423002A2ABB /* MNSigmoid.metal */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -349,8 +357,10 @@
 			files = (
 				64B890A41D1B1A5900AD6248 /* Shaders.metal in Sources */,
 				64AA0ECE1EAF8845003BFBCD /* MNConstantWidthSparseMatrix.mm in Sources */,
-				64BB5EB01F1210C4005D652E /* MNCovarianceKernel.m in Sources */,
+				64BB5EB01F1210C4005D652E /* MNCovarianceKernel.mm in Sources */,
 				64B890DB1D1B26E400AD6248 /* MNCRSSparseMatrix.m in Sources */,
+				649C080F1F613EEF002A2ABB /* MNSigmoidKernel.mm in Sources */,
+				649C08111F614423002A2ABB /* MNSigmoid.metal in Sources */,
 				64B8909F1D1B1A5900AD6248 /* AppDelegate.m in Sources */,
 				64B890A21D1B1A5900AD6248 /* GameViewController.m in Sources */,
 				64D121AB1EDD4F1400E64E78 /* MNAverageKernel.mm in Sources */,

@@ -6,6 +6,7 @@
 #import <MetalKit/MetalKit.h>
 #import <UIKit/UIKit.h>
 
+#import <simd/simd.h>
 
 #import "MNContext.h"
 
@@ -23,13 +24,13 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (MTLSize)threadGroupSize {
-  return MTLSizeMake(1, 1, 0);
+  return MTLSizeMake(32, 16, 1);
 }
 
 - (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
-  return MTLSizeMake(1, 1, 0);
-//  return MTLSizeMake(self.inputTexture.width / threadGroupSize.width,
-//                     self.inputTexture.height / threadGroupSize.height, 0);
+  //return MTLSizeMake(1, 1, 1);
+  return MTLSizeMake(self.inputTexture.width / threadGroupSize.width,
+                     self.inputTexture.height / threadGroupSize.height, 1);
 }
 
 + (void)testWithContext:(MNContext *)context {
@@ -41,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
                                                     options:MTLResourceStorageModeShared];
 
   id<MTLCommandBuffer> buffer = [context.queue commandBuffer];
-  int count = 1;
+  int count = 50;
   for (int i = 0; i < count; ++i) {
     [kernel enqueTo:buffer];
   }
@@ -53,8 +54,13 @@ NS_ASSUME_NONNULL_BEGIN
   NSDate *methodEnd = [NSDate date];
   NSTimeInterval executionTime = [methodEnd timeIntervalSinceDate:methodStart];
 
-  NSLog(@"covariance kernel took %g ms", executionTime * 1000);
+  NSLog(@"covariance kernel took %g ms", executionTime * 1000 / count);
 
+  float *outputPtr = (float *)kernel.outputBuffer.contents;
+
+  for (int i = 0; i < input.size.width * input.size.height; ++i) {
+
+  }
 }
 
 + (id<MTLTexture>)textureFromImage:(UIImage *)image device:(id<MTLDevice>)device {
