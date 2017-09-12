@@ -7,6 +7,7 @@
 #import <UIKit/UIKit.h>
 
 #import <simd/simd.h>
+#import <opencv2/opencv.hpp>
 
 #import "MNContext.h"
 
@@ -57,9 +58,13 @@ NS_ASSUME_NONNULL_BEGIN
   NSLog(@"covariance kernel took %g ms", executionTime * 1000 / count);
 
   float *outputPtr = (float *)kernel.outputBuffer.contents;
-
-  for (int i = 0; i < input.size.width * input.size.height; ++i) {
-
+  cv::Mat mat = [self cvMatFromUIImage:input];
+  uint8_t window[9] = {0};
+  for (int row = 1; row < input.size.height - 1; ++row) {
+    for (int col = 1; col < input.size.width - 1; ++col) {
+      cv::Mat window = mat(cv::Rect(row - 1, col - 1, 3, 3));
+      cv::Mat covariance = [self covarianceWithMat:window];
+    }
   }
 }
 
@@ -72,6 +77,40 @@ NS_ASSUME_NONNULL_BEGIN
     NSLog(@"errror loading input texture");
   }
   return texture;
+}
+
++ (cv::Mat)cvMatFromUIImage:(UIImage *)image
+{
+  CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
+  CGFloat cols = image.size.width;
+  CGFloat rows = image.size.height;
+
+  cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
+
+  CGContextRef contextRef = CGBitmapContextCreate(cvMat.data,                 // Pointer to  data
+                                                  cols,                       // Width of bitmap
+                                                  rows,                       // Height of bitmap
+                                                  8,                          // Bits per component
+                                                  cvMat.step[0],              // Bytes per row
+                                                  colorSpace,                 // Colorspace
+                                                  kCGImageAlphaNoneSkipLast |
+                                                  kCGBitmapByteOrderDefault); // Bitmap info flags
+
+  CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
+  CGContextRelease(contextRef);
+
+  return cvMat;
+}
+
++ (cv::Mat)covarianceWithMat:(const cv::Mat &)mat {
+  cv::Mat4f floatMat;
+  mat.convertTo(floatMat, CV_32FC4, 1.0 / 255.0, 0.0);
+  cv::Scalar mean = cv::mean(floatMat);
+  cv::Mat4f column = floatMat.reshape(0, mat.cols * mat.rows);
+  column.sub
+
+
+  cv::calcCovarMatrix(<#InputArray samples#>, <#OutputArray covar#>, <#InputOutputArray mean#>, <#int flags#>)
 }
 
 @end

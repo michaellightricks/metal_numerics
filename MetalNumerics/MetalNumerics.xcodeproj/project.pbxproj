@@ -31,6 +31,8 @@
 		64BB5EB21F12151F005D652E /* CovarianceKernel.metal in Sources */ = {isa = PBXBuildFile; fileRef = 64BB5EB11F12151F005D652E /* CovarianceKernel.metal */; };
 		64BB5EB41F1274C4005D652E /* tttt.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 64BB5EB31F1274C4005D652E /* tttt.jpg */; };
 		64BB5EB61F137B57005D652E /* lena.png in Resources */ = {isa = PBXBuildFile; fileRef = 64BB5EB51F137B57005D652E /* lena.png */; };
+		64CDEA781F66FA2D0099049E /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64CDEA771F66FA2D0099049E /* opencv2.framework */; };
+		64CDEA7A1F66FB100099049E /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64CDEA791F66FB100099049E /* opencv2.framework */; };
 		64D121AB1EDD4F1400E64E78 /* MNAverageKernel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */; };
 /* End PBXBuildFile section */
 
@@ -94,6 +96,8 @@
 		64BB5EB11F12151F005D652E /* CovarianceKernel.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = CovarianceKernel.metal; sourceTree = "<group>"; };
 		64BB5EB31F1274C4005D652E /* tttt.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tttt.jpg; sourceTree = "<group>"; };
 		64BB5EB51F137B57005D652E /* lena.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lena.png; sourceTree = "<group>"; };
+		64CDEA771F66FA2D0099049E /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = opencv2.framework; path = ../../Facetune/Foundations/third_party/opencv/opencv2.framework; sourceTree = "<group>"; };
+		64CDEA791F66FB100099049E /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = opencv2.framework; path = MetalNumerics/opencv2.framework; sourceTree = "<group>"; };
 		64D121A91EDD4F1400E64E78 /* MNAverageKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNAverageKernel.h; sourceTree = "<group>"; };
 		64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MNAverageKernel.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -103,6 +107,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64CDEA7A1F66FB100099049E /* opencv2.framework in Frameworks */,
+				64CDEA781F66FA2D0099049E /* opencv2.framework in Frameworks */,
 				64BA27D91EDF6E3D00765567 /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -127,6 +133,7 @@
 		64B8908E1D1B1A5900AD6248 = {
 			isa = PBXGroup;
 			children = (
+				64CDEA791F66FB100099049E /* opencv2.framework */,
 				64B890991D1B1A5900AD6248 /* MetalNumerics */,
 				64B890B61D1B1A5900AD6248 /* MetalNumericsTests */,
 				64B890C11D1B1A5900AD6248 /* MetalNumericsUITests */,
@@ -217,6 +224,7 @@
 		64BA27D71EDF6E3C00765567 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				64CDEA771F66FA2D0099049E /* opencv2.framework */,
 				64BA27D81EDF6E3D00765567 /* Accelerate.framework */,
 			);
 			name = Frameworks;
@@ -519,6 +527,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = KG6GWND6BG;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/MetalNumerics",
+				);
 				INFOPLIST_FILE = MetalNumerics/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Lightricks.MetalNumerics;
@@ -531,6 +543,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = KG6GWND6BG;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/MetalNumerics",
+				);
 				INFOPLIST_FILE = MetalNumerics/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Lightricks.MetalNumerics;
