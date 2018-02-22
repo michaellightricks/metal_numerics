@@ -4,7 +4,8 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-#import <simd/simd.h>
+//#import <simd/simd.h>
+typedef float float16_t;
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -8,10 +8,21 @@
 
 #import <simd/simd.h>
 #import <opencv2/opencv.hpp>
+#import <opencv2/imgcodecs/ios.h>
 
 #import "MNContext.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
+@interface MNCovarianceKernel ()
+
+@property (nonatomic) CGSize inputSize;
+
+@property (nonatomic) id<MTLBuffer> inputBuffer;
+
+@property (nonatomic) id<MTLBuffer> sizeBuffer;
+
+@end
 
 @implementation MNCovarianceKernel
 
@@ -19,31 +30,56 @@ NS_ASSUME_NONNULL_BEGIN
   return [super initWithContext:context functionName:@"covarianceKernel"];
 }
 
+- (void)setInputBuffer:(id<MTLBuffer>)buffer size:(CGSize)size {
+  self.inputSize = size;
+  self.inputBuffer = buffer;
+}
+
 - (void)configureCommandEncoder:(id<MTLComputeCommandEncoder>)encoder {
-  [encoder setTexture:self.inputTexture atIndex:0];
-  [encoder setBuffer:self.outputBuffer offset:0 atIndex:0];
+  //[encoder setTexture:self.inputTexture atIndex:0];
+  [encoder setBuffer:self.inputBuffer offset:0 atIndex:0];
+  [encoder setBuffer:self.outputBuffer offset:0 atIndex:1];
+
+//  simd_uint2 size;
+//  size.x = (uint)self.inputSize.width;
+//  size.y = (uint)self.inputSize.height;
+//  [encoder setBytes:&size length:sizeof(simd_uint2) atIndex:2];
 }
 
 - (MTLSize)threadGroupSize {
-  return MTLSizeMake(32, 16, 1);
+  return MTLSizeMake(16, 16, 1);
 }
 
 - (MTLSize)threadGroupsCountWithGroupSize:(MTLSize)threadGroupSize {
   //return MTLSizeMake(1, 1, 1);
-  return MTLSizeMake(self.inputTexture.width / threadGroupSize.width,
-                     self.inputTexture.height / threadGroupSize.height, 1);
+  return MTLSizeMake(cv::max(1, (int)(self.inputSize.width / threadGroupSize.width)),
+                     cv::max(1, (int)(self.inputSize.height / threadGroupSize.height)), 1);
 }
 
 + (void)testWithContext:(MNContext *)context {
   MNCovarianceKernel *kernel = [[MNCovarianceKernel alloc] initWithContext:context];
-  UIImage *input = [UIImage imageNamed:@"lena.png"];
-  kernel.inputTexture = [MNCovarianceKernel textureFromImage:input device:context.device];
+  UIImage *input = [UIImage imageNamed:@"lena"];
+  cv::Mat4b mat;
+  UIImageToMat(input, mat);
+
+  id<MTLBuffer> inputBuffer = [context.device newBufferWithLength:mat.cols * mat.rows * sizeof(simd_uchar4)
+                                                         options:MTLResourceStorageModeShared];
+  simd_uchar4 *inputData = (simd_uchar4 *)[inputBuffer contents];
+  for (int row = 0; row < mat.rows; ++row) {
+    for (int col = 0; col < mat.cols; ++col) {
+      cv::Vec4b v = mat(row, col);
+      inputData[row * mat.cols + col] = simd_make_uchar4(v(0), v(1), v(2), v(3));
+    }
+  }
+
+  [kernel setInputBuffer:inputBuffer size:input.size];
+//  kernel.inputTexture = [MNCovarianceKernel textureFromImage:input device:context.device];
   NSUInteger outputBytes = 6 * input.size.width * input.size.height * sizeof(float);
   kernel.outputBuffer = [context.device newBufferWithLength:outputBytes
                                                     options:MTLResourceStorageModeShared];
 
   id<MTLCommandBuffer> buffer = [context.queue commandBuffer];
-  int count = 50;
+  int count = 1;
   for (int i = 0; i < count; ++i) {
     [kernel enqueTo:buffer];
   }
@@ -51,27 +87,39 @@ NS_ASSUME_NONNULL_BEGIN
   NSDate *methodStart = [NSDate date];
   [buffer commit];
   [buffer waitUntilCompleted];
+  NSLog(@"%@", buffer.error.description);
 
   NSDate *methodEnd = [NSDate date];
   NSTimeInterval executionTime = [methodEnd timeIntervalSinceDate:methodStart];
 
   NSLog(@"covariance kernel took %g ms", executionTime * 1000 / count);
 
-  float *outputPtr = (float *)kernel.outputBuffer.contents;
-  cv::Mat mat = [self cvMatFromUIImage:input];
-  uint8_t window[9] = {0};
-  for (int row = 1; row < input.size.height - 1; ++row) {
-    for (int col = 1; col < input.size.width - 1; ++col) {
-      cv::Mat window = mat(cv::Rect(row - 1, col - 1, 3, 3));
-      cv::Mat covariance = [self covarianceWithMat:window];
-    }
-  }
+
+//  for (int row = 1; row < input.size.height - 1; ++row) {
+//    for (int col = 1; col < input.size.width - 1; ++col) {
+//      cv::Mat window = mat(cv::Rect(col - 1, row - 1, 3, 3));
+//      std::cout << "windiw byte: " << std::endl << window << std::endl;
+//      cv::Mat4f floatWindow;
+//      window.convertTo(floatWindow, CV_32FC4, 1.0 / 255.0, 0.0);
+//
+//      std::cout << "window:" << std::endl << floatWindow << std::endl;
+//      cv::Mat covarianceFromInput = [self invCovarianceWithMat:floatWindow];
+//      cv::Mat covarianceFromMetal = [self invCovarianceWithBuffer:kernel.outputBuffer
+//                                                         position:cv::Point(col, row)
+//                                                             size:cv::Size(mat.cols, mat.rows)];
+//      std::cout << covarianceFromInput << std::endl;
+//      std::cout << covarianceFromMetal << std::endl;
+////      cv::Mat difference = cv::abs(covarianceFromInput - covarianceFromMetal);
+////      std::cout << difference << std::endl;
+//    }
+//  }
 }
 
 + (id<MTLTexture>)textureFromImage:(UIImage *)image device:(id<MTLDevice>)device {
   NSError *error;
   id<MTLTexture> texture = [[[MTKTextureLoader alloc] initWithDevice:device]
-                            newTextureWithCGImage:image.CGImage options:nil error:&error];
+                            newTextureWithCGImage:image.CGImage
+                            options:@{MTKTextureLoaderOriginTopLeft: @YES} error:&error];
 
   if (error) {
     NSLog(@"errror loading input texture");
@@ -79,38 +127,58 @@ NS_ASSUME_NONNULL_BEGIN
   return texture;
 }
 
-+ (cv::Mat)cvMatFromUIImage:(UIImage *)image
-{
-  CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
-  CGFloat cols = image.size.width;
-  CGFloat rows = image.size.height;
-
-  cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
-
-  CGContextRef contextRef = CGBitmapContextCreate(cvMat.data,                 // Pointer to  data
-                                                  cols,                       // Width of bitmap
-                                                  rows,                       // Height of bitmap
-                                                  8,                          // Bits per component
-                                                  cvMat.step[0],              // Bytes per row
-                                                  colorSpace,                 // Colorspace
-                                                  kCGImageAlphaNoneSkipLast |
-                                                  kCGBitmapByteOrderDefault); // Bitmap info flags
-
-  CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
-  CGContextRelease(contextRef);
-
-  return cvMat;
+cv::Mat3f FTColumnMatrix(cv::Mat4f mat, cv::Vec3f mean) {
+  int elemNum = mat.cols * mat.rows;
+  cv::Mat1f result(elemNum, 3, 0.0);
+  for (int i = 0; i < elemNum; ++i) {
+    cv::Vec3f elem(mat(i)(0), mat(i)(1), mat(i)(2));
+    //cv::Vec3f centered = elem - mean;
+    result(i, 0) = elem(0);
+    result(i, 1) = elem(1);
+    result(i, 2) = elem(2);
+  }
+  return result;
 }
 
-+ (cv::Mat)covarianceWithMat:(const cv::Mat &)mat {
-  cv::Mat4f floatMat;
-  mat.convertTo(floatMat, CV_32FC4, 1.0 / 255.0, 0.0);
++ (cv::Mat)invCovarianceWithMat:(const cv::Mat4f &)floatMat {
   cv::Scalar mean = cv::mean(floatMat);
-  cv::Mat4f column = floatMat.reshape(0, mat.cols * mat.rows);
-  column.sub
+  cv::Mat1f meanMat(1, 3, mean(0));
+  meanMat(1) = mean(1);
+  meanMat(2) = mean(2);
+  std::cout << "meanMat: " << meanMat  << std::endl;
+  cv::Mat1f column = FTColumnMatrix(floatMat, cv::Vec3f(mean(0), mean(1), mean(2)));
+  cv::Mat1f covariance(3, 3, 0.0);
 
+  cv::calcCovarMatrix(column, covariance, meanMat, cv::CovarFlags::COVAR_ROWS |
+                      cv::CovarFlags::COVAR_NORMAL | cv::CovarFlags::COVAR_USE_AVG |
+                      cv::CovarFlags::COVAR_SCALE,
+                      CV_32F);
+  return covariance.inv();
+}
 
-  cv::calcCovarMatrix(<#InputArray samples#>, <#OutputArray covar#>, <#InputOutputArray mean#>, <#int flags#>)
++ (cv::Mat)invCovarianceWithBuffer:(id<MTLBuffer>)buffer position:(cv::Point)point
+                              size:(cv::Size)size {
+  float *ptr = (float *)buffer.contents;
+  cv::Mat1f covariance(3, 3, 0.0);
+  float *covariancePtr = ptr + (point.y * size.width + point.x) * 6;
+
+  std::cout << "metal row1:3" << std::endl;
+  for (int i = 0; i < 6; ++i) {
+    std::cout << *(covariancePtr + i) << " ";
+  }
+  std::cout << std::endl;
+
+  covariance(0,0) = covariancePtr[0];
+  covariance(1,1) = covariancePtr[1];
+  covariance(2, 2) = covariancePtr[2];
+  covariance(0, 1) = covariancePtr[3];
+  covariance(1, 0) = covariancePtr[3];
+  covariance(0, 2) = covariancePtr[4];
+  covariance(2, 0) = covariancePtr[4];
+  covariance(1, 2) = covariancePtr[5];
+  covariance(2, 1) = covariancePtr[5];
+
+  return covariance;
 }
 
 @end

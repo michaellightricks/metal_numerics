@@ -7,22 +7,30 @@
 //
 
 #include <metal_stdlib>
+
 using namespace metal;
 
 constexpr sampler pixelSampler(coord::pixel,
                                address::clamp_to_edge,
-                               filter::linear);
+                               filter::nearest);
 constant float ninth = 0.11111111111;
 
-float3x3 readRow(texture2d<float, access::sample> inputTexture, uint2 rowCenter);
-float3x3 covarianceAndMean(float3x3 row1, float3x3 row2, float3x3 row3);
-float3x3 inverseCovariance(float3x3 covariance);
+float3 readPixel(device uchar4 *inputBuffer, uint2 rowCenter, uint2 inputBufferSize) {
+  float3 result = float3(0);
 
-float3x3 readRow(texture2d<float, access::sample> inputTexture, uint2 rowCenter) {
+  uchar4 pixel = inputBuffer[rowCenter.y * inputBufferSize.x + rowCenter.x];
+  result.x = (float)pixel.x / 255.0f;
+  result.y = (float)pixel.y / 255.0f;
+  result.z = (float)pixel.z / 255.0f;
+
+  return result;
+}
+
+float3x3 readRow(device uchar4 *inputBuffer, uint2 rowCenter, uint2 inputBufferSize) {
   float3x3 row;
-  //row[0] = inputTexture.sample(pixelSampler, float2(rowCenter + uint2(-1, 0))).rgb;
-  row[1] = inputTexture.sample(pixelSampler, float2(rowCenter + uint2(0, 0))).rgb;
-  //row[2] = inputTexture.sample(pixelSampler, float2(rowCenter + uint2(1, 0))).rgb;
+  row[0] = readPixel(inputBuffer, rowCenter + uint2(-1, 0), inputBufferSize);
+  row[1] = readPixel(inputBuffer, rowCenter + uint2(0, 0), inputBufferSize);
+  row[2] = readPixel(inputBuffer, rowCenter + uint2(1, 0), inputBufferSize);
 
   return row;
 }
@@ -34,6 +42,17 @@ float3x3 covarianceAndMean(float3x3 row1, float3x3 row2, float3x3 row3) {
     result[2] += row1[i];
     result[2] += row2[i];
     result[2] += row3[i];
+  }
+
+  result[2] *= ninth;
+
+  for (int i = 0; i < 3; ++i) {
+    row1[i] -= result[2];
+    row2[i] -= result[2];
+    row3[i] -= result[2];
+  }
+
+  for (int i = 0; i < 3; ++i) {
     // XX
     result[0][0] += row1[i][0] * row1[i][0];
     result[0][0] += row2[i][0] * row2[i][0];
@@ -60,22 +79,20 @@ float3x3 covarianceAndMean(float3x3 row1, float3x3 row2, float3x3 row3) {
     result[1][2] += row3[i][1] * row3[i][2];
   }
 
-  result[2] *= ninth;
-
   // XX
-  result[0][0] = ninth * result[0][0] - result[2][0] * result[2][0];
+  result[0][0] = ninth * result[0][0];// - result[2][0] * result[2][0];
   // YY
-  result[0][1] = ninth * result[0][1] - result[2][1] * result[2][1];
+  result[0][1] = ninth * result[0][1];// - result[2][1] * result[2][1];
   // ZZ
-  result[0][2] = ninth * result[0][2] - result[2][2] * result[2][2];
+  result[0][2] = ninth * result[0][2];// - result[2][2] * result[2][2];
   // XY
-  result[1][0] = ninth * result[1][0] - result[2][0] * result[2][1];
+  result[1][0] = ninth * result[1][0];// - result[2][0] * result[2][1];
   // XZ
-  result[1][1] = ninth * result[1][1] - result[2][0] * result[2][2];
+  result[1][1] = ninth * result[1][1];// - result[2][0] * result[2][2];
   // YZ
-  result[1][2] = ninth * result[1][2] - result[2][1] * result[2][2];
+  result[1][2] = ninth * result[1][2];// - result[2][1] * result[2][2];
 
-  result[0] += float3(ninth * 1e-4);
+  //result[0] += float3(ninth * 1e-4);
 
   return result;
 }
@@ -114,22 +131,37 @@ float3x3 inverseCovariance(float3x3 covariance) {
   return float3x3(diagonal, offDiagonal, float3(det));
 }
 
-kernel void covarianceKernel(texture2d<float, access::sample> inputTexture [[texture(0)]],
-                             device float *outputBuffer [[buffer(0)]],
+kernel void covarianceKernel(//texture2d<float, access::read> inputTexture [[texture(0)]],
+                             device uchar4 *inputBuffer [[buffer(0)]],
+                             device float *outputBuffer [[buffer(1)]],
+                             //constant uint2 *inputBufferSize [[buffer(2)]],
                              uint2 tid [[ thread_position_in_grid]]) {
-  float3x3 row1 = readRow(inputTexture, tid + uint2(0, -1));
-  float3x3 row2 = readRow(inputTexture, tid);
-  float3x3 row3 = readRow(inputTexture, tid + uint2(0, 1));
+  uint2 inputBufferSize(512, 512);
+  if (!(tid.x < (inputBufferSize.x - 1) && tid.x > 0) ||
+      !(tid.y < (inputBufferSize.y - 1) && tid.y > 0)){
+    return;
+  }
+  
+  float3x3 row1 = readRow(inputBuffer, tid + uint2(0, -1), inputBufferSize);
+  float3x3 row2 = readRow(inputBuffer, tid, inputBufferSize);
+  float3x3 row3 = readRow(inputBuffer, tid + uint2(0, 1), inputBufferSize);
 
   float3x3 covariance = covarianceAndMean(row1, row2, row3);
   float3x3 inverse = inverseCovariance(covariance);
 //  if (tid.x == 0 && tid.y == 0) {
 //    outputBuffer[0] = inverse[0][0];
 //  }
-  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6] = inverse[0][0];//row2[1][0];
-  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 1] = inverse[0][1];
-  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 2] = inverse[0][2];
-  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 3] = inverse[1][0];
-  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 4] = inverse[1][1];
-  outputBuffer[tid.y * 6 * inputTexture.get_width() + tid.x * 6 + 5] = inverse[1][2];
+  uint offset = 6 * (tid.y * inputBufferSize.x + tid.x);
+  outputBuffer[offset] = inverse[0][0];
+  outputBuffer[offset + 1] = inverse[0][1];
+  outputBuffer[offset + 2] = inverse[0][2];
+  outputBuffer[offset + 3] = inverse[1][0];
+  outputBuffer[offset + 4] = inverse[1][1];
+  outputBuffer[offset + 5] = inverse[1][2];
+//  outputBuffer[offset] = row1[0][0];
+//  outputBuffer[offset + 1] = row1[0][1];
+//  outputBuffer[offset + 2] = row1[0][2];
+//  outputBuffer[offset + 3] = row3[2][0];
+//  outputBuffer[offset + 4] = row3[2][1];
+//  outputBuffer[offset + 5] = row3[2][2];
 }

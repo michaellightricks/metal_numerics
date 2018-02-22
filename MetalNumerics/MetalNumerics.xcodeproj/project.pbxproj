@@ -54,6 +54,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		641AB21C1FA86FE300306B7D /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
 		649C080D1F613EEF002A2ABB /* MNSigmoidKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNSigmoidKernel.h; sourceTree = "<group>"; };
 		649C080E1F613EEF002A2ABB /* MNSigmoidKernel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MNSigmoidKernel.mm; sourceTree = "<group>"; };
 		649C08101F614423002A2ABB /* MNSigmoid.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = MNSigmoid.metal; sourceTree = "<group>"; };
@@ -192,6 +193,7 @@
 				64D121A91EDD4F1400E64E78 /* MNAverageKernel.h */,
 				64D121AA1EDD4F1400E64E78 /* MNAverageKernel.mm */,
 				64BB5EB51F137B57005D652E /* lena.png */,
+				641AB21C1FA86FE300306B7D /* test.png */,
 				64BB5EAE1F1210C4005D652E /* MNCovarianceKernel.h */,
 				64BB5EAF1F1210C4005D652E /* MNCovarianceKernel.mm */,
 				64BB5EB11F12151F005D652E /* CovarianceKernel.metal */,

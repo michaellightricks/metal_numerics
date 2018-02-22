@@ -2,6 +2,7 @@
 // Created by Michael Kupchick.
 
 #import "MNKernel.h"
+#import <CoreGraphics/CoreGraphics.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -9,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)testWithContext:(MNContext *)context;
 
-@property (strong, nonatomic) id<MTLTexture> inputTexture;
+- (void)setInputBuffer:(id<MTLBuffer>)buffer size:(CGSize)size;
 
 @property (strong, nonatomic) id<MTLBuffer> outputBuffer;
 
